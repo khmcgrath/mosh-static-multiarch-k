@@ -8,7 +8,7 @@ jobs:
 
     strategy:
       matrix:
-        architecture: [amd64]
+        architecture: [amd64, arm64, armv7]
 
     steps:
       - name: Checkout code

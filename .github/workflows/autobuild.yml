@@ -28,17 +28,22 @@ jobs:
 
       - name: Test run mosh-server
         run: docker run -v $PWD/mosh:/mosh -w /mosh/src/frontend builder sh -c 'chmod +x mosh-server && ./mosh-server'
+
+      - name: Rename binaries
+        run: |
+          mv mosh/src/frontend/mosh-server mosh/src/frontend/mosh-server-linux-${{ matrix.architecture }}
+          mv mosh/src/frontend/mosh-client mosh/src/frontend/mosh-client-linux-${{ matrix.architecture }}
       
       - uses: actions/upload-artifact@v3
         with:
-          name: mosh-server-${{ matrix.architecture }}
-          path: mosh/src/frontend/mosh-server
+          name: mosh-server-linux-${{ matrix.architecture }}
+          path: mosh/src/frontend/mosh-server-linux-${{ matrix.architecture }}
           if-no-files-found: error
 
       - uses: actions/upload-artifact@v3
         with:
-          name: mosh-client-${{ matrix.architecture }}
-          path: mosh/src/frontend/mosh-client
+          name: mosh-client-linux-${{ matrix.architecture }}
+          path: mosh/src/frontend/mosh-client-linux-${{ matrix.architecture }}
           if-no-files-found: error
 
   release:
@@ -59,12 +64,12 @@ jobs:
             echo
             echo '## Files'
             echo '```'
-            (file mosh-client-*/mosh-client mosh-server-*/mosh-server)
+            (file mosh-client-*/mosh-client* mosh-server-*/mosh-server*)
             echo '```'
             echo
             echo '## SHA256 Checksums'
             echo '```'
-            (sha256sum mosh-client-*/mosh-client mosh-server-*/mosh-server)
+            (sha256sum mosh-client-*/mosh-client* mosh-server-*/mosh-server*)
             echo '```'
           ) | tee release.md
       
@@ -75,12 +80,6 @@ jobs:
           path: release.md
           if-no-files-found: error
 
-      - run: |
-          for i in mosh-client-*/; do zip -r "${i%/}.zip" "$i"; done
-
-      - run: |
-          for i in mosh-server-*/; do zip -r "${i%/}.zip" $i; done
-
       - name: Create release
         uses: softprops/action-gh-release@v1
         with:
@@ -90,5 +89,6 @@ jobs:
           draft: false
           body_path: release.md
           files: |
-            *.zip
+            mosh-client-*/mosh-client*
+            mosh-server-*/mosh-server*
 

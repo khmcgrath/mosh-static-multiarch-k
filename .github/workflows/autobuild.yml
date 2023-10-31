@@ -25,6 +25,9 @@ jobs:
 
       - name: Build binaries for ${{ matrix.architecture }}
         run: docker run -v $PWD/mosh:/mosh -w /mosh --name=builder builder sh -c './autogen.sh && LDFLAGS=-static ./configure && make'
+
+      - name: Test run mosh-server
+        run: docker run -v $PWD/mosh:/mosh -w /mosh/src/frontend builder sh -c 'chmod +x mosh-server && ./mosh-server'
       
       - uses: actions/upload-artifact@v3
         with:

@@ -64,12 +64,28 @@ jobs:
             echo
             echo '## Files'
             echo '```'
-            (file mosh-client-*/mosh-client* mosh-server-*/mosh-server*)
+            (
+              for dir in mosh-client* mosh-server*; do
+                cd "$dir"
+                for prog in mosh*; do
+                  file "$prog"
+                done
+                cd ..
+              done
+            )
             echo '```'
             echo
             echo '## SHA256 Checksums'
             echo '```'
-            (sha256sum mosh-client-*/mosh-client* mosh-server-*/mosh-server*)
+            (
+              for dir in mosh-client* mosh-server*; do
+                cd "$dir"
+                for prog in mosh*; do
+                  sha256sum "$prog"
+                done
+                cd ..
+              done
+            )
             echo '```'
           ) | tee release.md
       

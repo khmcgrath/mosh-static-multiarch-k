@@ -46,8 +46,8 @@ for triple in $ARCH_TRIPLES; do
         make install -j8 V=1 &&
         rm -f "${prefix}/etc"
     then
-    mv "${prefix}/local/bin/mosh-client" "${prefix}/local/bin/mosh-client-darwin-${arch}"
-    mv "${prefix}/local/bin/mosh-server" "${prefix}/local/bin/mosh-server-darwin-${arch}"
+    mv "${prefix}/local/bin/mosh-client" "${prefix}/local/bin/mosh-client-${MOSH_TAG}-darwin-${arch}"
+    mv "${prefix}/local/bin/mosh-server" "${prefix}/local/bin/mosh-server-${MOSH_TAG}-darwin-${arch}"
 
     BUILT_ARCHS="$BUILT_ARCHS $arch"
     fi

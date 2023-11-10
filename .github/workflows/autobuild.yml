@@ -1,6 +1,8 @@
 on:
   workflow_dispatch:
 name: Auto-Build
+env:
+  MOSH_TAG: 1.4.0
 jobs:
   macports-cache:
     runs-on: macos-12
@@ -52,7 +54,7 @@ jobs:
         run: | 
           docker build -t builder --build-arg TARGET_ARCH=${{ matrix.architecture }} .
 
-      - run: git clone --depth=1 --branch mosh-1.4.0 https://github.com/mobile-shell/mosh.git
+      - run: git clone --depth=1 --branch mosh-$MOSH_TAG https://github.com/mobile-shell/mosh.git
 
       - name: Build binaries for ${{ matrix.architecture }}
         run: docker run -v $PWD/mosh:/mosh -w /mosh --name=builder builder sh -c './autogen.sh && LDFLAGS=-static ./configure && make'
@@ -62,19 +64,19 @@ jobs:
 
       - name: Rename binaries
         run: |
-          mv mosh/src/frontend/mosh-server mosh/src/frontend/mosh-server-linux-${{ matrix.architecture }}
-          mv mosh/src/frontend/mosh-client mosh/src/frontend/mosh-client-linux-${{ matrix.architecture }}
+          mv mosh/src/frontend/mosh-server mosh/src/frontend/mosh-server-$MOSH_TAG-linux-${{ matrix.architecture }}
+          mv mosh/src/frontend/mosh-client mosh/src/frontend/mosh-client-$MOSH_TAG-linux-${{ matrix.architecture }}
       
       - uses: actions/upload-artifact@v3
         with:
-          name: mosh-server-linux-${{ matrix.architecture }}
-          path: mosh/src/frontend/mosh-server-linux-${{ matrix.architecture }}
+          name: mosh-server-${{ env.MOSH_TAG }}-linux-${{ matrix.architecture }}
+          path: mosh/src/frontend/mosh-server-${{ env.MOSH_TAG }}-linux-${{ matrix.architecture }}
           if-no-files-found: error
 
       - uses: actions/upload-artifact@v3
         with:
-          name: mosh-client-linux-${{ matrix.architecture }}
-          path: mosh/src/frontend/mosh-client-linux-${{ matrix.architecture }}
+          name: mosh-client-${{ env.MOSH_TAG }}-linux-${{ matrix.architecture }}
+          path: mosh/src/frontend/mosh-client-${{ env.MOSH_TAG }}-linux-${{ matrix.architecture }}
           if-no-files-found: error
   
   macos-build:
@@ -105,35 +107,35 @@ jobs:
             ${{ runner.os }}-build-
             ${{ runner.os }}-
 
-      - run: git clone --depth=1 --branch mosh-1.4.0 https://github.com/mobile-shell/mosh.git
+      - run: git clone --depth=1 --branch mosh-$MOSH_TAG https://github.com/mobile-shell/mosh.git
       
       - run: PATH=/opt/local/bin:$PATH ./autogen.sh
         working-directory: ./mosh
 
       - run: |
           chmod +x build.sh
-          env ZERO_AR_DATE=1 MACOSX_DEPLOYMENT_TARGET=11.0 PATH=/opt/local/bin:$PATH ./build.sh
+          env MOSH_TAG=$MOSH_TAG ZERO_AR_DATE=1 MACOSX_DEPLOYMENT_TARGET=11.0 PATH=/opt/local/bin:$PATH ./build.sh
         working-directory: ./macOS
 
       - uses: actions/upload-artifact@v3
         with:
-          name: mosh-client-darwin-x86_64
-          path: ./macOS/prefix_x86_64/local/bin/mosh-client-darwin-x86_64
+          name: mosh-client-${{ env.MOSH_TAG }}-darwin-x86_64
+          path: ./macOS/prefix_x86_64/local/bin/mosh-client-${{ env.MOSH_TAG }}-darwin-x86_64
 
       - uses: actions/upload-artifact@v3
         with:
-          name: mosh-server-darwin-x86_64
-          path: ./macOS/prefix_x86_64/local/bin/mosh-server-darwin-x86_64
+          name: mosh-server-${{ env.MOSH_TAG }}-darwin-x86_64
+          path: ./macOS/prefix_x86_64/local/bin/mosh-server-${{ env.MOSH_TAG }}-darwin-x86_64
       
       - uses: actions/upload-artifact@v3
         with:
-          name: mosh-client-darwin-arm64
-          path: ./macOS/prefix_arm64/local/bin/mosh-client-darwin-arm64
+          name: mosh-client-${{ env.MOSH_TAG }}-darwin-arm64
+          path: ./macOS/prefix_arm64/local/bin/mosh-client-${{ env.MOSH_TAG }}-darwin-arm64
 
       - uses: actions/upload-artifact@v3
         with:
-          name: mosh-server-darwin-arm64
-          path: ./macOS/prefix_arm64/local/bin/mosh-server-darwin-arm64
+          name: mosh-server-${{ env.MOSH_TAG }}-darwin-arm64
+          path: ./macOS/prefix_arm64/local/bin/mosh-server-${{ env.MOSH_TAG }}-darwin-arm64
 
 
 
@@ -157,7 +159,7 @@ jobs:
             echo '### Linux'
             echo '```'
             (
-              for dir in mosh-client-linux* mosh-server-linux*; do
+              for dir in mosh-client-$MOSH_TAG-linux* mosh-server-$MOSH_TAG-linux*; do
                 cd "$dir"
                 for prog in mosh*; do
                   file "$prog"
@@ -170,7 +172,7 @@ jobs:
             echo '### macOS'
             echo '```'
             (
-              for dir in mosh-client-darwin* mosh-server-darwin*; do
+              for dir in mosh-client-$MOSH_TAG-darwin* mosh-server-$MOSH_TAG-darwin*; do
                 cd "$dir"
                 for prog in mosh*; do
                   file "$prog"

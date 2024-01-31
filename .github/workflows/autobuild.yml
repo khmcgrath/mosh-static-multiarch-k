@@ -54,7 +54,7 @@ jobs:
         run: | 
           docker build -t builder --build-arg TARGET_ARCH=${{ matrix.architecture }} .
 
-      - run: git clone --depth=1 --branch mosh-$MOSH_TAG https://github.com/mobile-shell/mosh.git
+      - run: git clone --depth=1 --branch patched https://github.com/jdrouhard/mosh.git
 
       - name: Build binaries for ${{ matrix.architecture }}
         run: docker run -v $PWD/mosh:/mosh -w /mosh --name=builder builder sh -c './autogen.sh && LDFLAGS=-static ./configure && make'
